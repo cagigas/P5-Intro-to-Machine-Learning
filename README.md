@@ -1,8 +1,4 @@
-ud120-projects
-==============
-
-Starter project code for students taking Udacity ud120
-
+## Identify Fraud from Enron Email
 
 1. Summarize for us the goal of this project and how machine learning is useful 
 in trying to accomplish it. As part of your answer, give some background on the 
