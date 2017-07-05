@@ -12,11 +12,9 @@ from feature_format import featureFormat, targetFeatureSplit
 from sklearn.feature_selection import SelectKBest
 from sklearn import preprocessing
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.cross_validation import train_test_split
 from sklearn.grid_search import GridSearchCV
-
-
+from sklearn.metrics import precision_recall_fscore_support as score
 
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
@@ -157,21 +155,6 @@ for name in data_dict:
 
 print(plotOutliers(data_dict, 'fraction_from_poi', 'fraction_to_poi'))
 
-
-#    msg_from_poi = my_dataset[person]['from_poi_to_this_person']
-#    to_msg = my_dataset[person]['to_messages']
-#    if msg_from_poi != "NaN" and to_msg != "NaN":
-#        my_dataset[person]['msg_from_poi_ratio'] = msg_from_poi/float(to_msg)
-#    else:
-#        my_dataset[person]['msg_from_poi_ratio'] = 0
-#    msg_to_poi = my_dataset[person]['from_this_person_to_poi']
-#    from_msg = my_dataset[person]['from_messages']
-#    if msg_to_poi != "NaN" and from_msg != "NaN":
-#        my_dataset[person]['msg_to_poi_ratio'] = msg_to_poi/float(from_msg)
-#    else:
-#        my_dataset[person]['msg_to_poi_ratio'] = 0
-
-
 new_features = ["fraction_to_poi", "fraction_from_poi"]  # add two features
 
 new_features_list = features_list + new_features
@@ -183,14 +166,14 @@ labels, features = targetFeatureSplit(data)
 
 #Select the best features: 
 #Removes all features whose variance is below 80% 
-from sklearn.feature_selection import VarianceThreshold
-sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
-features = sel.fit_transform(features)
+#from sklearn.feature_selection import VarianceThreshold
+#sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
+#features = sel.fit_transform(features)
 
+#print features
 #Removes all but the k highest scoring features
 from sklearn.feature_selection import f_classif
-k = 7
-selector = SelectKBest(f_classif, k=7)
+selector = SelectKBest(f_classif, k=9)
 selector.fit_transform(features, labels)
 print("Best features:")
 scores = zip(new_features_list[1:],selector.scores_)
@@ -207,10 +190,10 @@ features = scaler.fit_transform(features)
 
 # Extract from dataset with new features
 data = featureFormat(data_dict, optimized_features_list + \
-                     ['fraction_to_poi', 'fraction_from_poi'], \
-                     sort_keys = True)
-new_f_labels, new_f_features = targetFeatureSplit(data)
-new_f_features = scaler.fit_transform(new_f_features)
+                    ['fraction_to_poi', 'fraction_from_poi'], sort_keys = True)
+new_labels, new_features = targetFeatureSplit(data)
+new_features = scaler.fit_transform(new_features)
+
 from sklearn.metrics import *
 #from sklearn.metrics import recall_score
 #from sklearn.metrics import accuracy_score
@@ -249,6 +232,8 @@ grid_search = GridSearchCV(clf, param)
 print("\nNaive bayes model: ")
 evaluateClf(grid_search, features, labels, param)
 
+print("\nNaive bayes model(with new Features): ")
+evaluateClf(grid_search, new_features, new_labels, param)
 
 # SVM
 from sklearn.svm import SVC
@@ -261,6 +246,9 @@ grid_search = GridSearchCV(clf, param)
 
 #print("\nSVM model: ")
 #evaluateClf(grid_search, features, labels, param)
+
+#print("\nSVM model(with new Features): ")
+#evaluateClf(grid_search, new_features, new_labels, param)
 
 # Regression
 from sklearn.linear_model import LogisticRegression
@@ -278,6 +266,9 @@ grid_search = GridSearchCV(clf, param)
 #print("\nRegression model: ")
 #evaluateClf(grid_search, features, labels, param)
 
+#print("\nRegression model(with new Features): ")
+#evaluateClf(grid_search, new_features, new_labels, param)
+
 # K Mean
 from sklearn.cluster import KMeans
 clf = KMeans()
@@ -288,6 +279,10 @@ param = {'n_clusters': [1, 2, 3, 4, 5], 'tol': [1, 0.1, 0.01, 0.001, 0.0001],
 grid_search = GridSearchCV(clf, param)
 #print("\nK-mean model: ")
 #evaluateClf(grid_search, features, labels, param)
+
+#print("\nK-mean model(with new Features): ")
+#evaluateClf(grid_search, new_features, new_labels, param)
+
 
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 

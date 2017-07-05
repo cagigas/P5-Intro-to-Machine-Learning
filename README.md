@@ -9,10 +9,13 @@ rubric items: “data exploration”, “outlier investigation”]
 The goal of this project is to identify the people who comitted fraud in Enron,
 based on financial and email data from Enron scandal.
 
-There are 146 people in the dataset and 21 features availables, such as, 
-'salary', 'deferral_payments', 'total_payments', 'loan_advances' or 'bonus' 
-among others for each person. Only 18 out of 146 are POI (People of Interest), 
-35 according to our definition.
+20 out of 21 features all contained missing values the only feature that did 
+not contain missing values was 'POI'. There are 146 people in the dataset and 
+21 features availables, such as, 'salary', 'deferral_payments', 
+'total_payments', 'loan_advances' or 'bonus' among others for each person. Only
+18 out of 146 are POI (People of Interest), 35 according to our definition. And
+128 non-POI.
+
 
 The dataset contain numerous missing data (NaN values).
 
@@ -60,11 +63,11 @@ feature that does not come ready-made in the dataset -- explain what feature
 you tried to make, and the rationale behind it. (You do not necessarily have to 
 use it in the final analysis, only engineer and test it.) In your feature 
 selection step, if you used an algorithm like a decision tree, please also give 
-the feature importances of the features that you use, and if you used an automated 
-feature selection function like SelectKBest, please report the feature scores 
-and reasons for your choice of parameter values.  [relevant rubric items: 
-“create new features”, “intelligently select features”, “properly scale 
-features”]
+the feature importances of the features that you use, and if you used an 
+automated feature selection function like SelectKBest, please report the 
+feature scores and reasons for your choice of parameter values.  [relevant 
+rubric items: “create new features”, “intelligently select features”, “properly
+scale features”]
 
 I created two new features 'fraction_to_poi' and 'fraction_from_poi', which 
 is the frequency an employee sent emails to POIs and the frequency and employee
@@ -73,9 +76,11 @@ It seems important for me how often you have been in touch with a POIs in order
 to be involved in the fraud. However, these two new features, eventually will 
 not be importants.
 
-Using VarianceThreshold to remove all features whose variance is below 80% and
-SelectKBest to get the best features, I filtered all features and left only 
-seven. Below we can see a table with the features with highest variance. 
+Using SelectKBest to get the best features, I filtered all features and left 
+only seven. I have tested with neven features and accuarcy, precision and 
+recall deos not change.
+
+Below we can see a table with the features with highest variance. 
 
 | Feature                    | Score               |
 | -------------------------- |:-------------------:|
@@ -113,7 +118,7 @@ algorithm”]
 I test 4 algorithm, SVM, Regression, KMeans and Naive Bayes. Below we can see 
 the results with the best parameters for each case.
 
-| Feature        | Accuarcy        | Precission     | Recall          |
+| Feature        | Accuarcy        | Precision      | Recall          |
 | -------------- |:---------------:|:--------------:|:---------------:|
 | Naive Bayes    | 0.854761904762  | 0.432977633478 | 0.373191558442  |
 | K-means        | 0.337619047619  | 0.664069275329 | 0.324404761905  |
@@ -134,8 +139,32 @@ KMeans parameters:
     n_clusters = 5
 
 As final decision, we choose Naive Bayes algorythm, as it has the highest 
-precision and recall.
+precision and recall. We can see below the accuarcy, precision and recall for
+for each algorithm with the new features included. 
 
+| Feature        | Accuarcy        | Precision      | Recall          |
+| -------------- |:---------------:|:--------------:|:---------------:|
+| Naive Bayes    | 0.842619047619  | 0.395617965368 | 0.37384992785   |
+| K-means        | 0.369047619048  | 0.760431767809 | 0.37380952381   |
+| Regression     | 0.859285714286  | 0.466736263736 | 0.244305916306  |
+| SVM            | 0.86619047619   | 0.093833333333 | 0.0442738095238 |
+
+SVM parameters:
+    kernel = 'rbf'
+    C = 0.1
+    gamma = 1
+    
+Regression parameters: 
+    tol = 1
+    C = 0.1
+
+KMeans parameters:
+    tol = 1
+    n_clusters = 5
+
+As we expected, when we include the new features most of parameters (Accuarcy,
+Precission and Recall) get worse.
+                                                                
 ---
 4. What does it mean to tune the parameters of an algorithm, and what can 
 happen if you don’t do this well?  How did you tune the parameters of your 
@@ -151,9 +180,24 @@ highest Accuarcy, Precission and Recall for an algorithm. This might be so
 effective but it might lead to overfit and get a bad results of the learning
 process.
 
-You can see in the question below the best parameters found for each of the 
+You can see in the question above the best parameters found for each of the 
 algorithms tested. Naive Bayes, whcih is the choosen algorithm does not need
 parameters.
+
+I used GridSearchCV to get the best parameter for each algorithm.
+
+SVM parameters:
+    kernel = 'linear'
+    C = 1
+    gamma = 1
+    
+Regression parameters: 
+    tol = 1
+    C = 0.1
+
+KMeans parameters:
+    tol = 0.1
+    n_clusters = 5
 
 
 ---
@@ -161,19 +205,27 @@ parameters.
 wrong? How did you validate your analysis?  [relevant rubric items: “discuss 
 validation”, “validation strategy”]
 
-Cross-validation is a model validation technique for assessing how the results 
-of a statistical analysis will generalize to an independent data set. 
+Model validation is referred to as the process where a trained model is 
+evaluated with a testing data set.
+
+Model validation is carried out after model training. Together with model 
+training, model validation aims to find an optimal model with the best 
+performance.
 
 A classic mistake is overfitting, it happend when the model performed well in
 training but not in the test set. In order to avoid this overfitting, I have
 created a function called evaluateClf which I calculate the mean of accuarcy, 
 precision and recall of 100 different training data.
 
+
 ---
 6. Give at least 2 evaluation metrics and your average performance for each of 
 them.  Explain an interpretation of your metrics that says something 
 human-understandable about your algorithm’s performance. [relevant rubric item: 
 “usage of evaluation metrics”]
+
+With the help of train_test_split I get the set of training data in a random
+way. I use a test_size=0.3. We get a result similar to our model.
 
 | Feature        | Accuarcy        | Precision      | Recall          |
 | -------------- |:---------------:|:--------------:|:---------------:|
@@ -183,3 +235,7 @@ I have considered precision and recall the most importants parameters.
 Precision indicates the ratio of true positives to the records POIs. It means
 that every 100 people there are 43 POIs. and only 37 are correctly classified
 as POIs. Recall is the ratio of true positives to the records POIs.
+
+
+
+
