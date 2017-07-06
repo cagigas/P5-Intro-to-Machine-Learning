@@ -81,6 +81,7 @@ precision and recall) of all of them and eventually chose 7. You can see below
 the table and chart of the results. 
 
 Normal Features:
+
 | k   | Accuarcy | Precision  | Recall  |
 | --- |:--------:|:----------:|:-------:|
 | 2   | 0.85210  | 0.48304    | 0.30477 |
@@ -93,6 +94,7 @@ Normal Features:
 | 9   | 0.84535  | 0.37247    | 0.31758 |
 
 With new Features:
+
 | k   | Accuarcy | Precision  | Recall  |
 | --- |:--------:|:----------:|:-------:|
 | 2   | 0.84205  | 0.43570    | 0.28990 |
@@ -263,11 +265,13 @@ With the help of train_test_split I get the set of training data in a random
 way. I use a test_size=0.3. We get a result similar to our model.
 
 Results without new Features:
+
 | Feature        | Accuarcy        | Precision      | Recall          |
 | -------------- |:---------------:|:--------------:|:---------------:|
 | Naive Bayes    | 0.854761904762  | 0.432977633478 | 0.373191558442  |
 
 Results with new Features:
+
 | Feature        | Accuarcy        | Precision      | Recall          |
 | -------------- |:---------------:|:--------------:|:---------------:|
 | Naive Bayes    | 0.835714285714  | 0.373023809524 | 0.376445165945  |
