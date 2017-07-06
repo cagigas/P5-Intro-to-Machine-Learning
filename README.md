@@ -76,9 +76,44 @@ It seems important for me how often you have been in touch with a POIs in order
 to be involved in the fraud. However, these two new features, eventually will 
 not be importants.
 
-Using SelectKBest to get the best features, I filtered all features and left 
-only seven. I have tested with neven features and accuarcy, precision and 
-recall deos not change.
+Using SelectKBest to get the best features, I compared the results (accuarcy, 
+precision and recall) of all of them and eventually chose 7. You can see below 
+the table and chart of the results. 
+
+Normal Features:
+| k   | Accuarcy | Precision  | Recall  |
+| --- |:--------:|:----------:|:-------:|
+| 2   | 0.85210  | 0.48304    | 0.30477 |
+| 3   | 0.83949  | 0.45824    | 0.29800 |
+| 4   | 0.84769  | 0.44512    | 0.27886 |
+| 5   | 0.84675  | 0.45052    | 0.31850 |
+| 6   | 0.85738  | 0.44924    | 0.35879 |
+| 7   | 0.85261  | 0.43183    | 0.37583 |
+| 8   | 0.84667  | 0.40897    | 0.37417 |
+| 9   | 0.84535  | 0.37247    | 0.31758 |
+
+With new Features:
+| k   | Accuarcy | Precision  | Recall  |
+| --- |:--------:|:----------:|:-------:|
+| 2   | 0.84205  | 0.43570    | 0.28990 |
+| 3   | 0.84128  | 0.44283    | 0.32108 |
+| 4   | 0.83925  | 0.41376    | 0.30562 |
+| 5   | 0.83225  | 0.40340    | 0.34635 |
+| 6   | 0.84119  | 0.39630    | 0.37286 |
+| 7   | 0.83571  | 0.37302    | 0.37644 |
+| 8   | 0.83143  | 0.36088    | 0.37719 |
+| 9   | 0.83023  | 0.32825    | 0.32117 |
+
+![Comparation](../master/img/img1.png)
+
+We can easily see that Precision drop when we use more than 5 features, 
+meanwhile recall peack is between six and seven. Accuarcy keeps steady from
+2 to 8 features. This is the reason why I chose only 7 features.
+ 
+An alternative approach would be to select the features based on the scores 
+provided. A cut-off point could be determined based on where the scores 
+drop-off. For example, based on the scores provided, I see that scores fell 
+significantly after the salary feature (4th highest).
 
 Below we can see a table with the features with highest variance. 
 
@@ -227,15 +262,17 @@ human-understandable about your algorithm’s performance. [relevant rubric item
 With the help of train_test_split I get the set of training data in a random
 way. I use a test_size=0.3. We get a result similar to our model.
 
+Results without new Features:
 | Feature        | Accuarcy        | Precision      | Recall          |
 | -------------- |:---------------:|:--------------:|:---------------:|
 | Naive Bayes    | 0.854761904762  | 0.432977633478 | 0.373191558442  |
+
+Results with new Features:
+| Feature        | Accuarcy        | Precision      | Recall          |
+| -------------- |:---------------:|:--------------:|:---------------:|
+| Naive Bayes    | 0.835714285714  | 0.373023809524 | 0.376445165945  |
 
 I have considered precision and recall the most importants parameters. 
 Precision indicates the ratio of true positives to the records POIs. It means
 that every 100 people there are 43 POIs. and only 37 are correctly classified
 as POIs. Recall is the ratio of true positives to the records POIs.
-
-
-
-

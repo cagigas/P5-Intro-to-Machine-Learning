@@ -35,9 +35,6 @@ features_list = poi_label + email_features + financial_features
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
-    
-#pprint.pprint(data_dict)
-# pprint(data_dict)
 
 # Print csv file with info
 def make_csv(data_dict):
@@ -54,11 +51,11 @@ def make_csv(data_dict):
             
 # make_csv(data_dict)
 # How many data points (people)?
-print("Data points: %i" % len(data_dict))
+print"Data points: %i" % len(data_dict)
 # For each person, how many features are available?
 print "Features avaliables: %i" % len(data_dict["SKILLING JEFFREY K"])
 #print enron_data["SKILLING JEFFREY K"]
-print "Numer of POI: %i"%len(dict((key, value) for key, value in data_dict.items() if value["poi"] == True))
+print "Numer of POI: %i" % len(dict((key, value) for key, value in data_dict.items() if value["poi"] == True))
 #print dict((key, value) for key, value in enron_data.items() if value["poi"] == True)
 
 # Are there features with many missing values? etc.
@@ -138,29 +135,31 @@ def computeFraction( poi_messages, all_messages ):
         return 0
     return float(poi_messages) / float(all_messages)
 
-for name in data_dict:
-    data_point = data_dict[name]
-    from_poi_to_this_person = data_point["from_poi_to_this_person"]
-    to_messages = data_point["to_messages"]
-    fraction_from_poi = computeFraction(from_poi_to_this_person, to_messages)
-    #print fraction_from_poi 
-    data_point["fraction_from_poi"] = fraction_from_poi
-    from_this_person_to_poi = data_point["from_this_person_to_poi"]
-    from_messages = data_point["from_messages"]
-    fraction_to_poi = computeFraction( from_this_person_to_poi, from_messages )
-    #print fraction_to_poi
-    submit_dict[name]={"from_poi_to_this_person":fraction_from_poi,
-                       "from_this_person_to_poi":fraction_to_poi}
-    data_point["fraction_to_poi"] = fraction_to_poi
+### Store to my_dataset for easy export below.
+my_dataset = data_dict
+for person in my_dataset:
+    msg_from_poi = my_dataset[person]['from_poi_to_this_person']
+    to_msg = my_dataset[person]['to_messages']
+    if msg_from_poi != "NaN" and to_msg != "NaN":
+        my_dataset[person]['fraction_from_poi'] = msg_from_poi/float(to_msg)
+    else:
+        my_dataset[person]['fraction_from_poi'] = 0
+    msg_to_poi = my_dataset[person]['from_this_person_to_poi']
+    from_msg = my_dataset[person]['from_messages']
+    if msg_to_poi != "NaN" and from_msg != "NaN":
+        my_dataset[person]['fraction_to_poi'] = msg_to_poi/float(from_msg)
+    else:
+        my_dataset[person]['fraction_to_poi'] = 0
 
-print(plotOutliers(data_dict, 'fraction_from_poi', 'fraction_to_poi'))
+
+print(plotOutliers(my_dataset, 'fraction_from_poi', 'fraction_to_poi'))
 
 new_features = ["fraction_to_poi", "fraction_from_poi"]  # add two features
 
 new_features_list = features_list + new_features
 
 ### Extract features and labels from dataset for local testing
-data = featureFormat(data_dict, new_features_list , sort_keys = True)
+data = featureFormat(my_dataset, new_features_list , sort_keys = True)
 
 labels, features = targetFeatureSplit(data)
 
@@ -173,7 +172,8 @@ labels, features = targetFeatureSplit(data)
 #print features
 #Removes all but the k highest scoring features
 from sklearn.feature_selection import f_classif
-selector = SelectKBest(f_classif, k=9)
+k=7
+selector = SelectKBest(f_classif, k=7)
 selector.fit_transform(features, labels)
 print("Best features:")
 scores = zip(new_features_list[1:],selector.scores_)
@@ -183,13 +183,13 @@ optimized_features_list = poi_label + list(map(lambda x: x[0], sorted_scores))[0
 print(optimized_features_list)
 
 # Extract from dataset without new features
-data = featureFormat(data_dict, optimized_features_list, sort_keys = True)
+data = featureFormat(my_dataset, optimized_features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 scaler = preprocessing.MinMaxScaler()
 features = scaler.fit_transform(features)
 
 # Extract from dataset with new features
-data = featureFormat(data_dict, optimized_features_list + \
+data = featureFormat(my_dataset, optimized_features_list + \
                     ['fraction_to_poi', 'fraction_from_poi'], sort_keys = True)
 new_labels, new_features = targetFeatureSplit(data)
 new_features = scaler.fit_transform(new_features)
@@ -224,7 +224,7 @@ def evaluateClf(grid_search, features, labels, params, iters=100):
         print("%s = %r, " % (param_name, best_params[param_name]))
         
 # Naive bayes
-from sklearn.naive_bayes import GaussianNB        
+from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 param = {}
 grid_search = GridSearchCV(clf, param)
@@ -235,15 +235,16 @@ evaluateClf(grid_search, features, labels, param)
 print("\nNaive bayes model(with new Features): ")
 evaluateClf(grid_search, new_features, new_labels, param)
 
+
 # SVM
-from sklearn.svm import SVC
+#from sklearn.svm import SVC
 
-clf = SVC()
-param = {'kernel': ['rbf', 'linear', 'poly'], 'C': [0.1, 1, 10, 100, 1000],\
-           'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 'random_state': [42]}
-    
-grid_search = GridSearchCV(clf, param)
-
+#clf = SVC()
+#param = {'kernel': ['rbf', 'linear', 'poly'], 'C': [0.1, 1, 10, 100, 1000],\
+#           'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 'random_state': [42]}
+#    
+#grid_search = GridSearchCV(clf, param)
+#
 #print("\nSVM model: ")
 #evaluateClf(grid_search, features, labels, param)
 
@@ -251,17 +252,17 @@ grid_search = GridSearchCV(clf, param)
 #evaluateClf(grid_search, new_features, new_labels, param)
 
 # Regression
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+#from sklearn.linear_model import LogisticRegression
+#from sklearn.pipeline import Pipeline
 
-clf = Pipeline(steps=[
-        ('scaler', preprocessing.StandardScaler()),
-        ('classifier', LogisticRegression())])
-
-param = {'classifier__tol': [1, 0.1, 0.01, 0.001, 0.0001], 
-         'classifier__C': [0.1, 0.01, 0.001, 0.0001]}
-
-grid_search = GridSearchCV(clf, param)
+#clf = Pipeline(steps=[
+#        ('scaler', preprocessing.StandardScaler()),
+#        ('classifier', LogisticRegression())])
+#
+#param = {'classifier__tol': [1, 0.1, 0.01, 0.001, 0.0001], 
+#         'classifier__C': [0.1, 0.01, 0.001, 0.0001]}
+#
+#grid_search = GridSearchCV(clf, param)
 
 #print("\nRegression model: ")
 #evaluateClf(grid_search, features, labels, param)
@@ -270,13 +271,13 @@ grid_search = GridSearchCV(clf, param)
 #evaluateClf(grid_search, new_features, new_labels, param)
 
 # K Mean
-from sklearn.cluster import KMeans
-clf = KMeans()
-
-param = {'n_clusters': [1, 2, 3, 4, 5], 'tol': [1, 0.1, 0.01, 0.001, 0.0001],
-         'random_state': [42]}
-
-grid_search = GridSearchCV(clf, param)
+#from sklearn.cluster import KMeans
+#clf = KMeans()
+#
+#param = {'n_clusters': [1, 2, 3, 4, 5], 'tol': [1, 0.1, 0.01, 0.001, 0.0001],
+#         'random_state': [42]}
+#
+#grid_search = GridSearchCV(clf, param)
 #print("\nK-mean model: ")
 #evaluateClf(grid_search, features, labels, param)
 
@@ -301,6 +302,9 @@ clf = tree.DecisionTreeClassifier()
 clf = clf.fit(features_train, labels_train)
 
 # Get the accuracy
-from sklearn.metrics import accuracy_score
 prediction = clf.predict(features_test)
-#┼print accuracy_score(prediction, labels_test)
+print accuracy_score(prediction, labels_test)
+
+# Exporting my_classifier.pkl, my_dataset.pkl and my_feature_list.pkl
+from tester import dump_classifier_and_data
+dump_classifier_and_data(clf, my_dataset, optimized_features_list)
