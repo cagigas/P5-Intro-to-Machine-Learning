@@ -317,3 +317,64 @@ I have considered precision and recall the most importants parameters.
 Precision indicates the ratio of true positives to the records POIs. It means
 that every 100 people there are 43 POIs. and only 37 are correctly classified
 as POIs. Recall is the ratio of true positives to the records POIs.
+
+# Corrections
+There is still an issue when saving the code, you are actually saving a decision tree and not your algorithm.
+
+As a side-note you could potentially improve the feature selection process by using an algorithmic approach to determine the number of features to be chosen (like RFE). I've left a comment regarding the matter, I hope you might find it interesting.
+
+poi_id.py can be run to export the dataset, list of features and algorithm, so that the final algorithm can be checked easily using tester.py.
+The issue raised by the previous reviewer has not been addressed, the final exported algorithm is a decision tree and does not reach 0.3 in precision and recall, one way to fix this and use your algorim is to comment out the following lines:
+```javascript
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(features_train, labels_train)
+
+prediction = clf.predict(features_test)
+print accuracy_score(prediction, labels_test)
+```
+####Student response addresses the most important characteristics of the dataset and uses these characteristics to inform their analysis. Important characteristics include:
+total number of data points
+allocation across classes (POI/non-POI)
+number of features used
+are there features with many missing values? etc.
+Pro Tip: There are several other options to deal with missing values like:
+a. Replacing the values with means or medians.
+b. Remove the features that have an exceeding number of missing values.
+c. More complex approaches rely on analysing the distribution of missing values: https://en.wikipedia.org/wiki/Missing_data
+http://scikit-learn.org/stable/modules/preprocessing.html
+
+
+####Univariate or recursive feature selection is deployed, or features are selected by hand (different combinations of features are attempted, and the performance is documented for each one). Features that are selected are reported and the number of features selected is justified. For an algorithm that supports getting the feature importances (e.g. decision tree) or feature scores (e.g. SelectKBest), those are documented as well.
+Pro Tip: Please note that you can leverage the power of recursive feature selection to automate the selection process and find a good indication of the number of relevant features, here is an example of how the code might look like:
+```javascript
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.feature_selection import RFECV
+svc = SVC(kernel="linear")
+rfecv = RFECV(estimator=svc, step=1, cv=StratifiedKFold(labels, 50),
+          scoring='precision')
+rfecv.fit(features, labels)
+print("Optimal number of features : %d" % rfecv.n_features_)
+print rfecv.support_
+features=features[:,rfecv.support_]
+# Plot number of features VS. cross-validation scores
+plt.figure()
+plt.xlabel("Number of features selected")
+plt.ylabel("Cross validation score (nb of correct classifications)")
+plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+plt.show()
+```
+
+
+####At least two different algorithms are attempted and their performance is compared, with the best performing one used in the final analysis.
+Pro Tip (Advanced): Xgboost, one of Kaggle’s top algorithms.
+In the recent years one algorithm emerged as favourite in the machine learning community, it is actually one of the most used in Kaggle: Xgboost.
+Here you can find an informative discussion on why that is the case: https://www.quora.com/Why-is-xgboost-given-so-much-less-attention-than-deep-learning-despite-its-ubiquity-in-winning-Kaggle-solutions
+The algorithm is not available sci-kit learn, here is how you can start working with it:
+http://machinelearningmastery.com/develop-first-xgboost-model-python-scikit-learn/
+
+
+####Performance of the final algorithm selected is assessed by splitting the data into training and testing sets or through the use of cross validation, noting the specific type of validation performed.
+Pro Tip: The dataset is small and skewed towards non-POI, we need a technique that accounts for that or the risk is that we would not be able to assess, in the validation phase, the real potential of our algorithm in terms of performance metrics. The chance of randomly splitting skewed and non representative validation sub-sets could be high, therefore the need to use stratification (preservation of the percentage of samples for each class) to achieve robustness in a dataset with the aforementioned limitations.
+http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
